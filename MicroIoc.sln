@@ -1,16 +1,16 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MicroIoc.Core", "MicroIoc.Core\MicroIoc.Core.csproj", "{23F63AE9-A436-4B27-9113-4142C09ADD08}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MicroIoc.Tests", "MicroIoc.Tests\MicroIoc.Tests.csproj", "{23888E7C-DA2C-4B50-956F-6AF079CDE0F8}"
-EndProject
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{3AAFAFC1-1E6E-47F1-979C-C045D47FB756}"
 	ProjectSection(SolutionItems) = preProject
 		Local.testsettings = Local.testsettings
 		MicroIoc.Core.vsmdi = MicroIoc.Core.vsmdi
 		TraceAndTestImpact.testsettings = TraceAndTestImpact.testsettings
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MicroIoc.Core", "MicroIoc.Core\MicroIoc.Core.csproj", "{23F63AE9-A436-4B27-9113-4142C09ADD08}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MicroIoc.Tests", "MicroIoc.Tests\MicroIoc.Tests.csproj", "{23888E7C-DA2C-4B50-956F-6AF079CDE0F8}"
 EndProject
 Global
 	GlobalSection(TestCaseManagementSettings) = postSolution
