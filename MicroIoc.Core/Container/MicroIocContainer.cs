@@ -1,4 +1,4 @@
-﻿using System;
+﻿﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -114,7 +114,7 @@ namespace MicroIoc
         /// Resolve an instance of the specified interface (or class) Type
         /// </summary>
         /// <param name="type">The type of interface or class to be resolved</param>
-        /// <param name="key">(Optional) a key to specify the instance within the container</param>
+        /// <param name="key">(Optional) a key to specify the instance within the container</param>        
         /// <returns>The registered instance if key is specified, or a dynamically instantiated instance, if not</returns>
         public object Resolve(Type type, string key = null)
         {
@@ -131,15 +131,15 @@ namespace MicroIoc
         /// <returns>An instance of  if registered, or null</returns>
         public object TryResolve(Type type, string key)
         {
-            try
-            {
-                return Resolve(type, key);
-            }
-            catch
+            var result = ResolveCore(type, key, throwOnNotFound: false);
+            if (result == null)
             {
                 return null;
             }
+            BuildUp(result);
+            return result;
         }
+
 
         /// <summary>
         /// Resolve all registered instances of a specified type
@@ -185,11 +185,7 @@ namespace MicroIoc
                 try
                 {
                     var fullPropertyName = string.Format("{0}.{1}", instance.GetType().FullName, info.Name);
-                    property = Resolve(null, fullPropertyName);
-                }
-                catch (Exception)
-                {
-                    property = Resolve(info.PropertyType);
+                    property = TryResolve(null, fullPropertyName) ?? Resolve(info.PropertyType);
                 }
                 finally
                 {
@@ -218,20 +214,27 @@ namespace MicroIoc
             return this;
         }
 
-        private object ResolveCore(Type type, string key)
+        private object ResolveCore(Type type, string key, bool throwOnNotFound = true)
         {
             if (type == null)
             {
                 type = DeriveType(key);
                 if (type == null)
-                    throw new ResolutionException("Failed to Derive type for " + key);
+                {
+                    if (throwOnNotFound)
+                    {
+                        throw new ResolutionException("Failed to Derive type for " + key);
+                    }
+                    return null;
+                }
+                
             }
 
             key = ValueOrDefault(key);
 
             return _resolverDictionary.ContainsKey(new Tuple<Type, string>(type, key))
                        ? _resolverDictionary[new Tuple<Type, string>(type, key)]()
-                       : BuildFromType(type);
+                       : BuildFromType(type, throwOnNotFound);
         }
 
         private Type DeriveType(string key)
@@ -256,29 +259,34 @@ namespace MicroIoc
                        : tuple.Item1;
         }
 
-        private object BuildFromType(Type type)
+        private object BuildFromType(Type type, bool throwOnError = true)
         {
             if (_registeredSingletons.Contains(type))
             {
                 object instance;
                 if (_singletonInstances.TryGetValue(type, out instance))
                     return instance;
-                instance = InstantiateInstance(type);
+                instance = InstantiateInstance(type, throwOnError);
 
                 _singletonInstances[type] = instance;
                 return instance;
             }
 
-            return InstantiateInstance(type);
+            return InstantiateInstance(type, throwOnError);
         }
 
-        private object InstantiateInstance(Type type)
+        private object InstantiateInstance(Type type, bool throwOnError = true)
         {
             var constructor = type.GetConstructors()
                 .OrderByDescending(c => c.GetParameters().Length)
                 .FirstOrDefault();
             if (constructor == null)
-                throw new ResolutionException("Could not locate a constructor for " + type.FullName);
+            {
+                if(throwOnError)
+                    throw new ResolutionException("Could not locate a constructor for " + type.FullName);
+
+                return null;
+            }
 
             var constructorParams = new List<object>(constructor.GetParameters().Length);
             foreach (var parameterInfo in constructor.GetParameters())
@@ -287,11 +295,7 @@ namespace MicroIoc
                 try
                 {
                     string key = type.ConstructorParamPattern(parameterInfo.Name);
-                    parameter = Resolve(null, key);
-                }
-                catch (Exception)
-                {
-                    parameter = Resolve(parameterInfo.ParameterType);
+                    parameter = TryResolve(null, key) ?? Resolve(parameterInfo.ParameterType);
                 }
                 finally
                 {
