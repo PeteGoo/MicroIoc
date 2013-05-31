@@ -174,6 +174,7 @@ namespace MicroIoc
         /// <param name="instance"></param>
         public void BuildUp(object instance)
         {
+            
             var propertyInfoCollection = instance.GetType().GetProperties();
 
             foreach (var propertyInfo in propertyInfoCollection)
