@@ -1,0 +1,10 @@
+glob:*/bin
+glob:*/obj
+glob:_ReSharper*
+glob:TestResults*
+glob:*/Bin
+glob:*.suo
+glob:*.user
+glob:*.nupkg
+glob:*.nuspec
+
